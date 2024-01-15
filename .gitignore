@@ -1,3 +1,5 @@
+*.pdf
+*.code-workspace
 # Logs
 logs
 *.log
