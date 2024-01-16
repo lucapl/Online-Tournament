@@ -1,0 +1,37 @@
+.center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+header {
+background-color:dodgerblue;
+padding: 1% ;
+}
+
+footer {
+background-color: dodgerblue;
+padding: 1%;
+}
+
+.main {
+height: 100vh;
+}
+
+.fill {
+justify-content: space-between;
+}
+
+.column {
+display: flex;
+flex-direction: column;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+}
+
+.empty {
+    flex: 100%;
+}
