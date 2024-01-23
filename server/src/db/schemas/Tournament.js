@@ -1,5 +1,14 @@
 const mongoose = require('mongoose');
 
+const participantSchema = new mongoose.Schema({
+    email: {
+        type: String,
+        unique: true // Ensure unique emails within the array
+    },
+    licenseNumber: String,
+    ranking: Number
+})
+
 const tournamentSchema = new mongoose.Schema({
     organizer: {
         type: String,
@@ -24,16 +33,20 @@ const tournamentSchema = new mongoose.Schema({
         type: Date,
         required: true,
     },
-    location: {
-        type: {
-            type: String,
-            enum: ['Point'],
-            default: 'Point',
-        },
-        coordinates: {
-            type: [Number],
-            required: true,
-        },
+    // location: {
+    //     type: {
+    //         type: String,
+    //         enum: ['Point'],
+    //         default: 'Point',
+    //     },
+    //     coordinates: {
+    //         type: [Number],
+    //         required: true,
+    //     },
+    // },
+    location:{
+        type: [Number],
+        required:true
     },
     maxParticipants: {
         type: Number,
@@ -42,10 +55,25 @@ const tournamentSchema = new mongoose.Schema({
     sponsorLogos: {
         type: [String], 
     },
-    rankedPlayers: {
-        type: Number,
-        required: true,
-    },
+    participants: {
+        type: [participantSchema],
+        default: [],
+        validate: [
+            {
+                validator: function(aP){
+                    return aP.length <= this.maxParticipants;
+                },
+                message: `Participants limit reached!`
+            },
+            {
+                validator: function(aP){
+                    const uniqueValues = new Set(aP);
+                    return uniqueValues.size === aP.length;
+                },
+                message: `Participant can't sign up more than once!`
+            }
+        ]
+    }   
 });
 
 const Tournament = mongoose.model('Tournament', tournamentSchema);
