@@ -30,14 +30,14 @@ export default function Home({serverUrl,pagination}) {
     const nextPage = Math.min(pageCount+1,maxPage);
     const prevPage = Math.max(pageCount-1,1);
 
-    return(<div>
+    return(<div class="column tournaments">
         <ul>
           {tournaments.map(t => <TournCard tournamentObject={t} key={t.id}  />)}
         </ul>
         <div class="row fill">
-            {pageCount-1 >= 1  && <Link to={`/${prevPage}`}>Previous</Link>}
+            {pageCount-1 >= 1  && <Link to={`/${prevPage}`}>←Previous</Link>}
             <div class="empty"></div>
-            {pageCount+1 <= maxPage && <Link to={`/${nextPage}`}>Next</Link>}
+            {pageCount+1 <= maxPage && <Link to={`/${nextPage}`}>Next→</Link>}
         </div>
     </div>)
 }
