@@ -5,7 +5,8 @@ const io = require('socket.io')(server);
 const cors = require('cors');
 const mongoose = require('mongoose');
 
-const router = require('./src/routing')
+const authRouter = require('./src/routing/auth')
+const resourceRouter = require('./src/routing/resources')
 //const db = require('./src/db/database');
 
 mongoose.connect('mongodb://127.0.0.1:27017/online_tournament',{
@@ -19,7 +20,8 @@ app.use(cors({
   origin: '*'
 }));
 
-app.use("/",router);
+app.use("/",authRouter);
+app.use("/",resourceRouter);
 
 server.listen(port, function() {
   console.log(`Listening on port ${port}`);

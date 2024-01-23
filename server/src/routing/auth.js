@@ -1,5 +1,5 @@
 const express = require('express');
-const router = express.Router();
+const authRouter = express.Router();
 const { request } = require('http');
 
 const bcrypt = require('bcrypt');
@@ -8,27 +8,19 @@ const nodemailer = require('nodemailer');
 
 const fs = require('fs');
 
-const { User } = require("./db/schemas/User");
-const { Tournament } = require("./db/schemas/Tournament");
+const { User } = require("../db/schemas/User");
+const { Tournament } = require("../db/schemas/Tournament");
 const { default: mongoose } = require('mongoose');
 
-router.use(express.json());
+authRouter.use(express.json());
 
 const secrets = JSON.parse(fs.readFileSync("./secrets.json"));
-// fs.readFile("./secrets.json", "utf8", (error, data) => {
-//     if (error) {
-//         console.log(error);
-//         return;
-//     }
-//     console.log(data);
-//     secrets = JSON.parse(data);
-// });
 
 const transporter = nodemailer.createTransport(secrets.transporter);
 
 const clientUrl = "http://localhost:3000/"
 
-router.post('/register', async (req, res) => {
+authRouter.post('/register', async (req, res) => {
     const { fname, lname, email, password, password_confirm } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -79,7 +71,7 @@ router.post('/register', async (req, res) => {
     
 });
 
-router.post('/login/forgot', async (req, res) => {
+authRouter.post('/login/forgot', async (req, res) => {
     const { email } = req.body;
 
     const confirmationToken = jwt.sign({ email }, secrets.jwt_key, { expiresIn: '24h' });
@@ -117,7 +109,7 @@ router.post('/login/forgot', async (req, res) => {
     
 });
 
-router.post('/login/restart', async (req, res) => {
+authRouter.post('/login/restart', async (req, res) => {
     const { password } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -151,7 +143,7 @@ router.post('/login/restart', async (req, res) => {
     
 });
 
-router.post('/login', async (req, res) => {
+authRouter.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     //const user = User.findById({email:email});
@@ -181,13 +173,13 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.get('/login/success', (req, res) => {
+authRouter.get('/login/success', (req, res) => {
     const { email, token } = req.query;
 
     res.json({ email, token });
 });
 
-router.get('/confirm/:token', async (req, res) => {
+authRouter.get('/confirm/:token', async (req, res) => {
     const { token } = req.params;
 
     console.log(`Confirmation request received: ${token}`);
@@ -205,58 +197,7 @@ router.get('/confirm/:token', async (req, res) => {
     }
 });
 
-router.get('/tournaments', async (req, res)=>{
-    const date = new Date().toString();
-    try{
-        var id = req.body.id;
-        const t = Tournament.find({ time: { $gte: date} }).sort({time: 1});
-        if (id){
-            id = id.filter((i) => mongoose.isValidObjectId(i));
-            t.find({_id: {$in: id}});
-        }
-
-        res.send(await t.exec());
-    }catch(error){
-        console.error('Get tournaments error:', error);
-        res.status(500).send('Internal server error');
-    }
-})
-
-router.get('/tournament/:id', async(req,res)=>{
-    const { id } = req.params;
-    try{
-        if (!mongoose.isValidObjectId(id)){
-            return res.status(400).send({"message": "Invalid id"});
-        }
-        const t = Tournament.findById(id);
-        if (!t){
-            return res.status(409).send({"message": "Tournament not found"});
-        }
-
-        res.send(await t.exec());
-    }catch(error){
-        console.error('Get tournament error:', error);
-        res.status(500).send({"message":'Internal server error'});
-    }
-})
-
-router.get('/users', async (req, res)=>{
-    try{
-        var id = req.body.id;
-        const t = Tournament.find({ time: { $gte: date} }).sort({time: 1});
-        if (id){
-            id = id.filter((i) => mongoose.isValidObjectId(i));
-            t.find({_id: {$in: id}});
-        }
-
-        res.send(await t.select({firstName,lastName,email}).exec());
-    }catch(error){
-        console.error('Get tournament error:', error);
-        res.status(500).send('Internal server error');
-    }
-})
-
-router.get('/validate', async (req,res)=>{
+authRouter.get('/validate', async (req,res)=>{
     const token = req.body.token;
     const email = req.body.email;
     try{
@@ -267,83 +208,4 @@ router.get('/validate', async (req,res)=>{
     }
 })
 
-router.post('/tournaments/create', async (req,res)=>{
-    
-    try{
-        const {id, name, time, applicationDeadline, location, maxParticipants, sponsorLogos} = req.body;
-
-        const header = req.headers;
-
-        const {authorization} = header;
-
-        const decoded = jwt.decode(authorization, secrets.jwt_key);
-        if (!decoded){
-            return res.status(409).send({message:"Invalid credentials"});
-        }
-
-        if(id){
-            await Tournament.findOneAndUpdate({_id:id},{name,time,applicationDeadline,location,maxParticipants,sponsorLogos});
-            return res.status(200).send({message:"Tournament edited"});
-        }
-
-        const tournament = new Tournament({
-            name,
-            organizer: decoded.email,
-            time,
-            applicationDeadline,
-            location,
-            maxParticipants,
-            sponsorLogos
-        });
-
-        await tournament.save();
-
-        return res.status(200).send({message:"Tournament created"});
-
-    }catch(error){
-        console.log(error);
-        return res.status(500).send({message:'Internal server error'});
-    }
-})
-
-router.post('/tournament/join',async (req,res)=>{
-    try{
-        const {participant,id} = req.body;
-
-        const header = req.headers;
-
-        const {authorization} = header;
-
-        const decoded = jwt.decode(authorization, secrets.jwt_key);
-        if (!decoded){
-            return res.status(409).send({message:"Invalid credentials"});
-        }
-        const email = decoded.email;
-        if (email !== participant.email){
-            return res.status(403).send({message:"Forbidden"});
-        }
-
-        const result = await Tournament.findOneAndUpdate(
-            {
-                _id:id,
-                $expr: {
-                    $and: [
-                        { $lt: [{ $size: '$participants' }, '$maxParticipants'] }
-                    ]
-                },
-                "participants.email": {$not: { $eq: email } }
-            },
-            { $addToSet : { participants: participant } },
-            );
-
-        if (!result){
-            return res.status(400).send({message: "Could not join the tournament"});
-        }
-        return res.status(200).send({message: "Joined successfully"});
-    }catch(error){
-        console.log("Tournament join error"+error);
-        return res.status(500).send({message:"Internal server error"})
-    }
-})
-
-module.exports = router ;
+module.exports = authRouter;
