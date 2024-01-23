@@ -15,6 +15,7 @@ import TourCreator from "./components/tournament/TourCreator.jsx";
 import UserProfile from "./closures/UserProfile.jsx";
 import serverConfig from "./serverConfig.json";
 import JoinTournament from "./components/tournament/TournamentJoin.jsx";
+import Profile from "./components/user/Profile.jsx";
 
 const server = serverConfig.serverUrl;
 
@@ -82,7 +83,7 @@ function App() {
       .then((data) => {
           return navigate(`/response/${status}/${data.message}`);
       });
-      }
+    }
   const handleLoginRestart = function(form_data,token){
       const requestOptions = {
           method: 'POST',
@@ -127,12 +128,12 @@ function App() {
           loggedIn &&
           <div class="column">
             <div>Logged in as</div>
-            <div>{UserProfile.get().login}</div>
+            <div><Link to={`/user/${UserProfile.get().login}`}>{UserProfile.get().login}</Link></div>
             <button onClick={handleLogout}>Logout</button>
           </div>
         }
       </header>
-      <section class="center">
+      <section class="center pad-2">
         <Routes>
           <Route path="/" element={<Home serverUrl={server} pagination={10}/>}/>
           <Route path="/:page" element={<Home serverUrl={server} pagination={10}/>}/>
@@ -145,6 +146,7 @@ function App() {
           <Route path="/tournamentCreator" element={<TourCreator serverUrl={server}/>}></Route>
           <Route path="/tournament/edit/:id" element={<TourCreator serverUrl={server}/>}></Route>
           <Route path="/tournament/join/:id" element={<JoinTournament/>}></Route>
+          <Route path="/user/:email" element={<Profile/>}></Route>
           <Route path="/*" element={<NotFound/>}/>
           <Route path="/response/:status/:message" element={<Response/>}/>
         </Routes>

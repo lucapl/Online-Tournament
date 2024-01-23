@@ -1,5 +1,5 @@
 import React, {useState,useEffect} from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
 import "../../styles.css";
@@ -47,12 +47,12 @@ export default function Tournament({serverUrl}){
         navigate(`/tournament/join/${id}`);
     }
 
-    return(<div>
+    return(<div class="column max-height">
         {isOwner && <button onClick={()=>{
             navigate(`/tournament/edit/${tour._id}`);
         }}>Edit</button>}
         <h1>Tournament name: {tour.name}</h1>
-        <h2>Organizer: {tour.organizer}</h2>
+        <h2>Organizer: <Link to={`/user/${tour.organizer}`}>{tour.organizer}</Link></h2>
         <div>
             <div>Location:</div>
             <LocationPickerMap clickable={false} defaultLocation={tour.location}/>
