@@ -1,0 +1,13 @@
+td.uneditable{
+    background-color: lightgray;
+}
+
+
+td.own{
+    background-color: gray;
+}
+
+td.tour{
+    text-align: center;
+}
+

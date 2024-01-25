@@ -6,7 +6,19 @@ const participantSchema = new mongoose.Schema({
         unique: true // Ensure unique emails within the array
     },
     licenseNumber: String,
-    ranking: Number
+    ranking: Number,
+    score: {
+        type: Number,
+        default: 0
+    },
+    played: {
+        type: Boolean,
+        default: false
+    },
+    won: {
+        type: Boolean,
+        default: false
+    }
 })
 
 const tournamentSchema = new mongoose.Schema({
@@ -73,7 +85,15 @@ const tournamentSchema = new mongoose.Schema({
                 message: `Participant can't sign up more than once!`
             }
         ]
-    }   
+    },
+    happening:{
+        type: Boolean,
+        default: true
+    },
+    round: {
+        type: Number,
+        default: 0
+    }
 });
 
 const Tournament = mongoose.model('Tournament', tournamentSchema);

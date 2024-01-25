@@ -35,6 +35,10 @@ function App() {
   // const { hash, pathname, search } = location;
 
   const handleRegister = function(form_data) {
+    var result = window.confirm("User details are unchangable\nAccount cannot be deleted");
+    if (!result){
+      return null;
+    }
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

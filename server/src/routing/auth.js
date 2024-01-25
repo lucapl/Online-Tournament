@@ -54,15 +54,15 @@ authRouter.post('/register', async (req, res) => {
         };
 
         console.log(`Confirmation link generated ${confirmationLink}`);
-        // transporter.sendMail(mailOptions, (error, info) => {
-        //     if (error) {
-        //         console.error('Error sending confirmation email:', error);
-        //         res.status(500).json({ message: 'Error sending confirmation email' });
-        //     } else {
-        //         console.log('Confirmation email sent:', info.response);
-        //         res.json({ message: 'User registered. Check your email for confirmation.' });
-        //     }
-        // });
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Error sending confirmation email:', error);
+                res.status(500).json({ message: 'Error sending confirmation email' });
+            } else {
+                console.log('Confirmation email sent:', info.response);
+                res.json({ message: 'User registered. Check your email for confirmation.' });
+            }
+        });
 
     } catch (error) {
         console.error('Registration error:', error);
